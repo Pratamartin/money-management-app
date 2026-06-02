@@ -1,0 +1,197 @@
+package com.pratatec.moneymgtapp.ui.auth
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.pratatec.moneymgtapp.ui.auth.components.AuthFooterLink
+import com.pratatec.moneymgtapp.ui.auth.components.PasswordField
+import com.pratatec.moneymgtapp.ui.auth.components.PrimaryButton
+
+@Composable
+fun RegisterScreen(
+    viewModel: AuthViewModel,
+    onNavigateToLogin: () -> Unit,
+    onRegisterSuccess: () -> Unit,
+) {
+    val state = viewModel.registerState
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            if (event is AuthEvent.NavigateToLogin) onRegisterSuccess()
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+    ) {
+        Spacer(Modifier.height(16.dp))
+
+        IconButton(onClick = onNavigateToLogin) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Voltar",
+                tint = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(10.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(text = "$", fontWeight = FontWeight.Bold, color = Color.Black)
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "Criar conta",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = "Leva menos de um minuto.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = state.nome,
+            onValueChange = viewModel::updateNome,
+            label = { Text("Nome") },
+            singleLine = true,
+            isError = state.fieldErrors.containsKey("nome"),
+            supportingText = state.fieldErrors["nome"]?.let { { Text(it) } },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = state.username,
+            onValueChange = viewModel::updateUsername,
+            label = { Text("Usuário") },
+            placeholder = { Text("ex: pratatec_") },
+            singleLine = true,
+            isError = state.fieldErrors.containsKey("username"),
+            supportingText = state.fieldErrors["username"]?.let { { Text(it) } },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = state.email,
+            onValueChange = viewModel::updateRegisterEmail,
+            label = { Text("Email") },
+            singleLine = true,
+            isError = state.fieldErrors.containsKey("email"),
+            supportingText = state.fieldErrors["email"]?.let { { Text(it) } },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        PasswordField(
+            value = state.password,
+            onValueChange = viewModel::updateRegisterPassword,
+            isError = state.fieldErrors.containsKey("password"),
+            errorMessage = state.fieldErrors["password"],
+            imeAction = ImeAction.Next,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        PasswordField(
+            value = state.confirmPassword,
+            onValueChange = viewModel::updateConfirmPassword,
+            label = "Confirmar senha",
+            isError = state.fieldErrors.containsKey("confirmPassword"),
+            errorMessage = state.fieldErrors["confirmPassword"],
+            imeAction = ImeAction.Done,
+            onImeAction = viewModel::register,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        if (state.error != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = state.error,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "Ao se cadastrar, você concorda com nossos Termos e Política de Privacidade.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        PrimaryButton(
+            text = "Criar conta",
+            onClick = viewModel::register,
+            isLoading = state.isLoading,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        AuthFooterLink(
+            text = "Já tem conta?",
+            linkText = "Entrar",
+            onClick = onNavigateToLogin,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+        )
+
+        Spacer(Modifier.height(32.dp))
+    }
+}

@@ -1,0 +1,9 @@
+package com.pratatec.moneymgtapp.data.remote.dto
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class TokenRefreshResponse(
+    val access: String,
+    val refresh: String? = null,
+)
