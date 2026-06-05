@@ -1,4 +1,5 @@
 import dj_database_url
+from datetime import timedelta
 from decouple import config
 
 BASE_DIR = __file__.rsplit("/", 2)[0]
@@ -98,8 +99,6 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
 }
-
-from datetime import timedelta
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),

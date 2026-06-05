@@ -50,6 +50,55 @@ Acesse o painel em: `http://localhost:8000/admin/`
 
 ---
 
+## Testes
+
+A suite cobre modelos, serializers, services (lógica de negócio) e endpoints da API — 82 testes no total.
+
+### Rodar via Docker (recomendado)
+
+Com os containers no ar:
+
+```bash
+sudo docker compose exec web python manage.py test --settings=config.test_settings
+```
+
+O flag `--settings=config.test_settings` usa SQLite em memória, então **não precisa de banco PostgreSQL rodando**.
+
+### Rodar localmente (sem Docker)
+
+Crie um virtualenv com as dependências e execute:
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+python manage.py test --settings=config.test_settings
+```
+
+### Rodar um módulo específico
+
+```bash
+# Apenas testes de models do finance
+python manage.py test finance.tests.test_models --settings=config.test_settings
+
+# Apenas testes de services (lógica pura, sem HTTP)
+python manage.py test finance.tests.test_services --settings=config.test_settings
+
+# Apenas testes de um app
+python manage.py test accounts --settings=config.test_settings
+```
+
+### Ver cobertura (opcional)
+
+```bash
+pip install coverage
+coverage run manage.py test --settings=config.test_settings
+coverage report
+```
+
+---
+
 ## Endpoints disponíveis
 
 | Método | URL | Auth | Descrição |
