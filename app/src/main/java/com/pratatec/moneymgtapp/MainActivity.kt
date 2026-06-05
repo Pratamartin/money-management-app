@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pratatec.moneymgtapp.ui.auth.AuthViewModel
 import com.pratatec.moneymgtapp.ui.navigation.NavGraph
+import com.pratatec.moneymgtapp.ui.profile.ThemeViewModel
 import com.pratatec.moneymgtapp.ui.theme.MoneymgtappTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,9 +15,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MoneymgtappTheme {
-                val viewModel: AuthViewModel = viewModel()
-                NavGraph(viewModel = viewModel)
+            val themeViewModel: ThemeViewModel = viewModel()
+            MoneymgtappTheme(appTheme = themeViewModel.appTheme) {
+                val authViewModel: AuthViewModel = viewModel()
+                NavGraph(viewModel = authViewModel, themeViewModel = themeViewModel)
             }
         }
     }
