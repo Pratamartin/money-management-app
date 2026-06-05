@@ -1,0 +1,54 @@
+name: Release Android APK
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/moneymgtapp-release.jks
+
+      - name: Build release APK
+        env:
+          KEYSTORE_PATH: moneymgtapp-release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      - name: Get tag name
+        id: tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Rename APK
+        run: mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/moneymgtapp-${{ steps.tag.outputs.TAG }}.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          name: "MoneyMgtApp ${{ steps.tag.outputs.TAG }}"
+          body: |
+            ## O que há de novo
+            _Edite este release no GitHub antes de publicar._
+
+            ## Instalação
+            1. Baixe o arquivo `moneymgtapp-${{ steps.tag.outputs.TAG }}.apk`
+            2. No Android, ative "Fontes desconhecidas" nas configurações
+            3. Abra o APK e instale
+          files: app/build/outputs/apk/release/moneymgtapp-${{ steps.tag.outputs.TAG }}.apk
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
