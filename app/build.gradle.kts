@@ -1,7 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+}
+
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) load(f.inputStream())
 }
 
 android {
@@ -9,6 +16,17 @@ android {
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(
+                System.getenv("KEYSTORE_PATH") ?: localProps.getProperty("signing.keystore")
+            )
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: localProps.getProperty("signing.password")
+            keyAlias = System.getenv("KEY_ALIAS") ?: localProps.getProperty("signing.alias")
+            keyPassword = System.getenv("KEY_PASSWORD") ?: localProps.getProperty("signing.password")
         }
     }
 
@@ -27,6 +45,7 @@ android {
             buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
         }
         release {
+            signingConfig = signingConfigs.getByName("release")
             buildConfigField("String", "BASE_URL", "\"https://money-management-app-production.up.railway.app/\"")
             isMinifyEnabled = true
             proguardFiles(
