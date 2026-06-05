@@ -1,5 +1,6 @@
 package com.pratatec.moneymgtapp.data.remote.api
 
+import com.pratatec.moneymgtapp.BuildConfig
 import com.pratatec.moneymgtapp.data.local.TokenStorage
 import com.pratatec.moneymgtapp.data.remote.dto.TokenRefreshResponse
 import io.ktor.client.HttpClient
@@ -19,9 +20,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object KtorClient {
-    const val BASE_URL = "http://192.168.0.104:8000/"
-    //http://10.0.2.2:8000/"
-    //192.168.0.104
+    const val BASE_URL = BuildConfig.BASE_URL
 
     fun create(tokenStorage: TokenStorage): HttpClient = HttpClient(Android) {
         install(ContentNegotiation) {
