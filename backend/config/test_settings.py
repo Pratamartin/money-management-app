@@ -1,10 +1,11 @@
 import os
-from .settings import *
 
 os.environ.setdefault("SECRET_KEY", "ci-test-secret-key-not-for-production")
 os.environ.setdefault("POSTGRES_DB", "test")
 os.environ.setdefault("POSTGRES_USER", "test")
 os.environ.setdefault("POSTGRES_PASSWORD", "test")
+
+from .settings import *  # noqa: E402
 
 DATABASES = {
     "default": {
