@@ -2,28 +2,49 @@ package com.pratatec.moneymgtapp.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
-private val AppColorScheme = darkColorScheme(
-    primary = Green500,
-    onPrimary = Color.Black,
-    primaryContainer = Green600,
-    onPrimaryContainer = Color.White,
-    background = Background,
-    onBackground = OnSurface,
-    surface = Surface,
-    onSurface = OnSurface,
-    onSurfaceVariant = OnSurfaceVariant,
-    outline = Outline,
-    error = ErrorRed,
-    onError = Color.White,
+enum class AppTheme { DARK, WHITE }
+
+private val DarkColorScheme = darkColorScheme(
+    primary = DarkPrimary,
+    onPrimary = DarkOnPrimary,
+    primaryContainer = DarkPrimary.copy(alpha = 0.2f),
+    onPrimaryContainer = DarkOnSurface,
+    background = DarkBackground,
+    onBackground = DarkOnSurface,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    outline = DarkOutline,
+    error = DarkError,
+    onError = DarkOnSurface,
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = LightPrimary,
+    onPrimary = LightOnPrimary,
+    primaryContainer = LightPrimary.copy(alpha = 0.15f),
+    onPrimaryContainer = LightOnSurface,
+    background = LightBackground,
+    onBackground = LightOnSurface,
+    surface = LightSurface,
+    onSurface = LightOnSurface,
+    onSurfaceVariant = LightOnSurfaceVariant,
+    outline = LightOutline,
+    error = LightError,
+    onError = LightSurface,
 )
 
 @Composable
-fun MoneymgtappTheme(content: @Composable () -> Unit) {
+fun MoneymgtappTheme(
+    appTheme: AppTheme = AppTheme.DARK,
+    content: @Composable () -> Unit,
+) {
+    val colorScheme = if (appTheme == AppTheme.DARK) DarkColorScheme else LightColorScheme
     MaterialTheme(
-        colorScheme = AppColorScheme,
+        colorScheme = colorScheme,
         typography = Typography,
         content = content,
     )
