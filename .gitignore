@@ -1,3 +1,4 @@
+*.jks
 *.iml
 .gradle
 /local.properties
@@ -16,4 +17,4 @@
 .externalNativeBuild
 .cxx
 local.properties
-/docs
+.idea
