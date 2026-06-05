@@ -13,13 +13,17 @@ def calcular_total_gasto_mes(periodo) -> Decimal:
 
 def calcular_limite_diario(periodo) -> Decimal:
     """
-    limite_hoje = (saldo_disponivel_mes - Σ gastos até ontem) / dias restantes no mês
-    Dias restantes inclui hoje.
+    limite_hoje = (saldo_disponivel_mes - Σ gastos até ontem) / dias restantes − gasto hoje
+    Retorna o saldo restante do dia (negativo se excedeu o limite).
     """
     hoje = date.today()
 
     total_ate_ontem = periodo.gastos_diarios.filter(
         data__lt=hoje
+    ).aggregate(total=Sum("valor"))["total"] or Decimal("0")
+
+    total_hoje = periodo.gastos_diarios.filter(
+        data=hoje
     ).aggregate(total=Sum("valor"))["total"] or Decimal("0")
 
     _, dias_no_mes = calendar.monthrange(periodo.ano, periodo.mes)
@@ -28,4 +32,5 @@ def calcular_limite_diario(periodo) -> Decimal:
     if dias_restantes <= 0:
         return Decimal("0")
 
-    return (periodo.saldo_disponivel_mes - total_ate_ontem) / dias_restantes
+    limite_bruto = (periodo.saldo_disponivel_mes - total_ate_ontem) / dias_restantes
+    return limite_bruto - total_hoje
