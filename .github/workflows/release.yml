@@ -20,6 +20,13 @@ jobs:
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/moneymgtapp-release.jks
 
+      - name: Verify keystore
+        run: |
+          keytool -list \
+            -keystore app/moneymgtapp-release.jks \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -alias "${{ secrets.KEY_ALIAS }}"
+
       - name: Build release APK
         env:
           KEYSTORE_PATH: moneymgtapp-release.jks
