@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoneyMgtApp — Controle Financeiro Pessoal</title>
+  <meta name="description" content="App Android para gerenciamento de finanças pessoais. Acompanhe gastos diários, controle categorias e visualize resumos mensais." />
+  <style>
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #222636;
+      --border:    #2e3347;
+      --primary:   #4ade80;
+      --primary-d: #22c55e;
+      --text:      #f0f2f8;
+      --text-muted:#8892b0;
+      --radius:    12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(15,17,23,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: .6rem;
+      font-weight: 700; font-size: 1.1rem;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo {
+      width: 32px; height: 32px;
+      background: var(--primary); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .btn-nav {
+      background: var(--primary); color: #0f1117;
+      font-weight: 700; padding: .5rem 1.2rem;
+      border-radius: 8px; text-decoration: none; font-size: .9rem;
+      transition: background .2s;
+    }
+    .btn-nav:hover { background: var(--primary-d); }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      max-width: 760px; margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(74,222,128,.12);
+      color: var(--primary);
+      border: 1px solid rgba(74,222,128,.3);
+      border-radius: 999px;
+      padding: .3rem 1rem; font-size: .8rem;
+      font-weight: 600; letter-spacing: .05em;
+      text-transform: uppercase; margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 1rem;
+    }
+    .hero h1 span { color: var(--primary); }
+    .hero p {
+      font-size: 1.15rem; color: var(--text-muted);
+      max-width: 540px; margin: 0 auto 2.5rem;
+    }
+    .hero-buttons {
+      display: flex; gap: 1rem;
+      justify-content: center; flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--primary); color: #0f1117;
+      font-weight: 700; padding: .85rem 2rem;
+      border-radius: var(--radius);
+      text-decoration: none; font-size: 1rem;
+      transition: background .2s, transform .15s;
+    }
+    .btn-primary:hover { background: var(--primary-d); transform: translateY(-2px); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: transparent; color: var(--text);
+      font-weight: 600; padding: .85rem 2rem;
+      border-radius: var(--radius); text-decoration: none; font-size: 1rem;
+      border: 1px solid var(--border);
+      transition: border-color .2s, transform .15s;
+    }
+    .btn-ghost:hover { border-color: var(--primary); transform: translateY(-2px); }
+
+    /* SCREENSHOTS */
+    .screenshots-section {
+      padding: 3rem 2rem; text-align: center; overflow: hidden;
+    }
+    .section-label {
+      font-size: .8rem; font-weight: 600;
+      color: var(--text-muted); letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: 2rem;
+    }
+    .screenshots-scroll {
+      display: flex; gap: 1.5rem;
+      overflow-x: auto; padding: .5rem .5rem 1.5rem;
+      justify-content: center;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .sc-card {
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden;
+      width: 190px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      transition: transform .25s;
+    }
+    .sc-card:hover { transform: translateY(-6px) scale(1.02); }
+    .sc-card img { width: 100%; height: auto; display: block; }
+    .sc-card p {
+      padding: .6rem; font-size: .75rem;
+      color: var(--text-muted); font-weight: 500;
+    }
+
+    /* FEATURES */
+    .features-section {
+      padding: 5rem 2rem;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .section-header { text-align: center; margin-bottom: 3.5rem; }
+    .section-header h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 800; margin-bottom: .6rem;
+    }
+    .section-header p { color: var(--text-muted); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .f-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.75rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .f-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .f-icon {
+      width: 48px; height: 48px;
+      background: rgba(74,222,128,.1);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1rem;
+    }
+    .f-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .4rem; }
+    .f-card p  { font-size: .9rem; color: var(--text-muted); }
+
+    /* STACK */
+    .stack-section {
+      padding: 5rem 2rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .stack-section h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: .6rem; }
+    .stack-section > p { color: var(--text-muted); margin-bottom: 2.5rem; }
+    .stack-pills { display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center; }
+    .pill {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px; padding: .45rem 1.1rem;
+      font-size: .85rem; font-weight: 600;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .g { background: #4ade80; }
+    .b { background: #60a5fa; }
+    .o { background: #fb923c; }
+    .v { background: #c084fc; }
+
+    /* DOWNLOAD */
+    .download-section {
+      padding: 6rem 2rem; text-align: center;
+      max-width: 640px; margin: 0 auto;
+    }
+    .download-section h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 800; margin-bottom: .8rem;
+    }
+    .download-section > p { color: var(--text-muted); margin-bottom: 2rem; }
+    .install-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem; text-align: left; margin-bottom: 2rem;
+    }
+    .install-box h4 {
+      font-size: .8rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-muted); margin-bottom: 1rem;
+    }
+    .install-box ol { padding-left: 1.2rem; }
+    .install-box li {
+      font-size: .95rem; color: var(--text-muted); margin-bottom: .5rem;
+    }
+    .install-box li strong { color: var(--text); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem; text-align: center;
+      font-size: .85rem; color: var(--text-muted);
+    }
+    footer a { color: var(--primary); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    .divider { height: 1px; background: var(--border); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">
+    <span class="nav-logo">💰</span>
+    MoneyMgtApp
+  </a>
+  <a href="https://github.com/Pratamartin/money-management-app/releases/latest"
+     class="btn-nav" target="_blank" rel="noopener">↓ Baixar APK</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-badge">Android · Open Source</span>
+  <h1>Controle suas<br /><span>finanças pessoais</span><br />com clareza</h1>
+  <p>Substitua planilhas e anotações manuais por um app nativo Android. Acompanhe gastos diários, defina limites mensais e visualize onde seu dinheiro está indo.</p>
+  <div class="hero-buttons">
+    <a href="https://github.com/Pratamartin/money-management-app/releases/latest"
+       class="btn-primary" target="_blank" rel="noopener">↓ &nbsp;Baixar versão mais recente</a>
+    <a href="https://github.com/Pratamartin/money-management-app"
+       class="btn-ghost" target="_blank" rel="noopener">★ &nbsp;Ver no GitHub</a>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section class="screenshots-section">
+  <p class="section-label">Telas do app</p>
+  <div class="screenshots-scroll">
+    <div class="sc-card">
+      <img src="https://raw.githubusercontent.com/Pratamartin/money-management-app/main/Design/login_cadastro.png"
+           alt="Login e Cadastro" loading="lazy" />
+      <p>Login / Cadastro</p>
+    </div>
+    <div class="sc-card">
+      <img src="https://raw.githubusercontent.com/Pratamartin/money-management-app/main/Design/home.png"
+           alt="Home" loading="lazy" />
+      <p>Início</p>
+    </div>
+    <div class="sc-card">
+      <img src="https://raw.githubusercontent.com/Pratamartin/money-management-app/main/Design/controle_diario.png"
+           alt="Controle Diário" loading="lazy" />
+      <p>Controle Diário</p>
+    </div>
+    <div class="sc-card">
+      <img src="https://raw.githubusercontent.com/Pratamartin/money-management-app/main/Design/control_mensal.png"
+           alt="Mensal" loading="lazy" />
+      <p>Resumo Mensal</p>
+    </div>
+    <div class="sc-card">
+      <img src="https://raw.githubusercontent.com/Pratamartin/money-management-app/main/Design/gerenciamento.png"
+           alt="Gerenciamento" loading="lazy" />
+      <p>Gerenciamento</p>
+    </div>
+    <div class="sc-card">
+      <img src="https://raw.githubusercontent.com/Pratamartin/money-management-app/main/Design/perfil.png"
+           alt="Perfil" loading="lazy" />
+      <p>Perfil</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="section-header">
+    <h2>Tudo que você precisa para controlar suas finanças</h2>
+    <p>Funcionalidades pensadas para uso diário, sem complexidade desnecessária.</p>
+  </div>
+  <div class="features-grid">
+    <div class="f-card">
+      <div class="f-icon">📅</div>
+      <h3>Períodos Mensais</h3>
+      <p>Organize seus gastos por períodos com saldo e limite claros desde o início do mês.</p>
+    </div>
+    <div class="f-card">
+      <div class="f-icon">💸</div>
+      <h3>Controle Diário</h3>
+      <p>Registre gastos do dia a dia com categorias personalizadas e veja o histórico de cada data.</p>
+    </div>
+    <div class="f-card">
+      <div class="f-icon">🏷️</div>
+      <h3>Categorias Personalizadas</h3>
+      <p>Crie e gerencie suas próprias categorias de gasto para uma visão mais precisa dos seus hábitos.</p>
+    </div>
+    <div class="f-card">
+      <div class="f-icon">📊</div>
+      <h3>Resumo do Mês</h3>
+      <p>Veja rapidamente o total gasto, o saldo restante e o limite diário na tela inicial.</p>
+    </div>
+    <div class="f-card">
+      <div class="f-icon">🎨</div>
+      <h3>Tema Escuro e Claro</h3>
+      <p>Escolha o tema que preferir. Suas preferências ficam salvas automaticamente no perfil.</p>
+    </div>
+    <div class="f-card">
+      <div class="f-icon">🔒</div>
+      <h3>Conta Segura</h3>
+      <p>Autenticação com JWT. Seus dados ficam armazenados no backend com segurança.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section class="stack-section">
+  <h2>Tecnologia de qualidade</h2>
+  <p>Construído com as melhores ferramentas do ecossistema Android e backend moderno.</p>
+  <div class="stack-pills">
+    <span class="pill"><span class="dot g"></span>Kotlin</span>
+    <span class="pill"><span class="dot g"></span>Jetpack Compose</span>
+    <span class="pill"><span class="dot g"></span>Material 3</span>
+    <span class="pill"><span class="dot b"></span>MVVM</span>
+    <span class="pill"><span class="dot b"></span>Ktor Client</span>
+    <span class="pill"><span class="dot o"></span>Django</span>
+    <span class="pill"><span class="dot o"></span>Django REST Framework</span>
+    <span class="pill"><span class="dot v"></span>PostgreSQL</span>
+    <span class="pill"><span class="dot v"></span>Railway</span>
+    <span class="pill"><span class="dot b"></span>GitHub Actions CI/CD</span>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section class="download-section">
+  <h2>Pronto para instalar</h2>
+  <p>O APK é distribuído diretamente pelo GitHub Releases e assinado com keystore oficial.</p>
+  <div class="install-box">
+    <h4>Como instalar</h4>
+    <ol>
+      <li>Baixe o arquivo <strong>moneymgtapp-vX.X.X.apk</strong> no botão abaixo.</li>
+      <li>No Android, vá em <strong>Configurações → Segurança</strong> e ative <strong>"Fontes desconhecidas"</strong>.</li>
+      <li>Abra o APK baixado e toque em <strong>Instalar</strong>.</li>
+      <li>Crie sua conta e comece a registrar seus gastos!</li>
+    </ol>
+  </div>
+  <a href="https://github.com/Pratamartin/money-management-app/releases/latest"
+     class="btn-primary" target="_blank" rel="noopener">↓ &nbsp;Baixar APK mais recente</a>
+</section>
+
+<footer>
+  <p>
+    Feito por <a href="https://github.com/Pratamartin" target="_blank" rel="noopener">@Pratamartin</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/Pratamartin/money-management-app" target="_blank" rel="noopener">Código no GitHub</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/Pratamartin/money-management-app/releases" target="_blank" rel="noopener">Releases</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/Pratamartin/money-management-app/issues" target="_blank" rel="noopener">Reportar bug</a>
+  </p>
+</footer>
+
+</body>
+</html>
