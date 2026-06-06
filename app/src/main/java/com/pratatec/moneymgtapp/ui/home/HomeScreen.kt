@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -128,6 +129,7 @@ fun HomeScreen(
                         orcamentoTotal = resumo?.saldoDisponivelMes ?: 0.0,
                         disponivel = (resumo?.saldoDisponivelMes ?: 0.0) - (resumo?.totalGastoMes ?: 0.0),
                         gasto = resumo?.totalGastoMes ?: 0.0,
+                        onEdit = viewModel::openEditPeriodo,
                     )
                 }
             }
@@ -153,6 +155,18 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    if (viewModel.editPeriodoSheet.visible) {
+        EditPeriodoSheet(
+            state = viewModel.editPeriodoSheet,
+            mes = state.mes,
+            ano = state.ano,
+            onDismiss = viewModel::closeEditPeriodo,
+            onUpdateSaldoCarteira = viewModel::updateEditSaldoCarteira,
+            onUpdateSaldoDisponivel = viewModel::updateEditSaldoDisponivel,
+            onSave = viewModel::saveEditPeriodo,
+        )
     }
 
     if (viewModel.createSheet.visible) {
@@ -427,6 +441,7 @@ private fun ResumoMesCard(
     orcamentoTotal: Double,
     disponivel: Double,
     gasto: Double,
+    onEdit: () -> Unit,
 ) {
     val percentualUsado = if (orcamentoTotal > 0) (gasto / orcamentoTotal).toFloat().coerceIn(0f, 1f) else 0f
     val percentualUsadoPct = (percentualUsado * 100).toInt()
@@ -450,11 +465,22 @@ private fun ResumoMesCard(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(
-                    text = "${orcamentoTotal.toBRL()} no total",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "${orcamentoTotal.toBRL()} no total",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar orçamento",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(14.dp),
+                        )
+                    }
+                }
             }
 
             Spacer(Modifier.height(12.dp))
@@ -566,6 +592,133 @@ private fun SemPeriodoCard(mes: Int, ano: Int, onCreate: () -> Unit) {
             ) {
                 Text("Criar período", fontWeight = FontWeight.SemiBold)
             }
+        }
+    }
+}
+
+// ── Sheet: Editar período ────────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditPeriodoSheet(
+    state: EditPeriodoSheetState,
+    mes: Int,
+    ano: Int,
+    onDismiss: () -> Unit,
+    onUpdateSaldoCarteira: (String) -> Unit,
+    onUpdateSaldoDisponivel: (String) -> Unit,
+    onSave: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = onDismiss) {
+                    Icon(Icons.Default.Close, contentDescription = "Fechar", tint = MaterialTheme.colorScheme.onSurface)
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Editar período",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        text = "${nomeMes(mes)} $ano",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(48.dp))
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Text(
+                text = "SALDO DA CARTEIRA",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
+            OutlinedTextField(
+                value = state.saldoCarteira,
+                onValueChange = onUpdateSaldoCarteira,
+                prefix = { Text("R$", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = "ORÇAMENTO DISPONÍVEL NO MÊS",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
+            OutlinedTextField(
+                value = state.saldoDisponivelMes,
+                onValueChange = onUpdateSaldoDisponivel,
+                prefix = { Text("R$", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            if (state.error != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(state.error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Button(
+                onClick = onSave,
+                enabled = !state.isSaving,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+            ) {
+                if (state.isSaving) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                } else {
+                    Text(
+                        text = "Salvar",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
         }
     }
 }

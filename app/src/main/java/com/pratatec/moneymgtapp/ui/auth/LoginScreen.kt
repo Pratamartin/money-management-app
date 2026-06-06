@@ -1,17 +1,25 @@
 package com.pratatec.moneymgtapp.ui.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,10 +34,13 @@ import com.pratatec.moneymgtapp.ui.auth.components.AuthFooterLink
 import com.pratatec.moneymgtapp.ui.auth.components.MoneyMgtLogo
 import com.pratatec.moneymgtapp.ui.auth.components.PasswordField
 import com.pratatec.moneymgtapp.ui.auth.components.PrimaryButton
+import com.pratatec.moneymgtapp.ui.profile.ThemeViewModel
+import com.pratatec.moneymgtapp.ui.theme.AppTheme
 
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
+    themeViewModel: ThemeViewModel,
     onNavigateToRegister: () -> Unit,
     onLoginSuccess: () -> Unit,
 ) {
@@ -41,19 +52,23 @@ fun LoginScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
-            .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .navigationBarsPadding(),
     ) {
-        Spacer(Modifier.height(80.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(Modifier.height(80.dp))
 
-        MoneyMgtLogo()
+            MoneyMgtLogo()
 
         Spacer(Modifier.height(48.dp))
 
@@ -114,5 +129,25 @@ fun LoginScreen(
             onClick = onNavigateToRegister,
             modifier = Modifier.padding(bottom = 32.dp),
         )
+        }
+
+        IconButton(
+            onClick = {
+                themeViewModel.setTheme(
+                    if (themeViewModel.appTheme == AppTheme.DARK) AppTheme.WHITE else AppTheme.DARK
+                )
+            },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 8.dp, end = 8.dp)
+                .size(40.dp),
+        ) {
+            Icon(
+                imageVector = if (themeViewModel.appTheme == AppTheme.DARK) Icons.Default.LightMode else Icons.Default.DarkMode,
+                contentDescription = "Alternar tema",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
 }

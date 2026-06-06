@@ -69,6 +69,7 @@ fun NavGraph(viewModel: AuthViewModel, themeViewModel: ThemeViewModel) {
         composable("login") {
             LoginScreen(
                 viewModel = viewModel,
+                themeViewModel = themeViewModel,
                 onNavigateToRegister = { navController.navigate("register") },
                 onLoginSuccess = {
                     navController.navigate("main") {
@@ -80,6 +81,7 @@ fun NavGraph(viewModel: AuthViewModel, themeViewModel: ThemeViewModel) {
         composable("register") {
             RegisterScreen(
                 viewModel = viewModel,
+                themeViewModel = themeViewModel,
                 onNavigateToLogin = { navController.popBackStack() },
                 onRegisterSuccess = { navController.popBackStack() },
             )

@@ -63,6 +63,21 @@ class FinanceApi(private val client: HttpClient) {
         jsonParser.decodeFromString(raw)
     }
 
+    suspend fun updatePeriodo(
+        periodoId: Int,
+        saldoCarteira: String? = null,
+        saldoDisponivelMes: String? = null,
+    ): Result<PeriodoResponse> = runCatching {
+        val raw = client.patch("${KtorClient.BASE_URL}periodos/$periodoId/") {
+            contentType(ContentType.Application.Json)
+            setBody(buildJsonObject {
+                saldoCarteira?.let { put("saldo_carteira", it) }
+                saldoDisponivelMes?.let { put("saldo_disponivel_mes", it) }
+            })
+        }.bodyAsText()
+        jsonParser.decodeFromString<PeriodoResponse>(raw)
+    }
+
     suspend fun getResumo(periodoId: Int): Result<ResumoResponse> = runCatching {
         val response = client.get("${KtorClient.BASE_URL}periodos/$periodoId/resumo/")
         val raw = response.bodyAsText()

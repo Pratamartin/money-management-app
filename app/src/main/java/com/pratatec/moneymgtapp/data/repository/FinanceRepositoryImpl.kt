@@ -38,6 +38,13 @@ class FinanceRepositoryImpl(private val api: FinanceApi) : FinanceRepository {
             )
         ).map { it.toDomain() }
 
+    override suspend fun updatePeriodo(periodoId: Int, saldoCarteira: Double?, saldoDisponivelMes: Double?) =
+        api.updatePeriodo(
+            periodoId = periodoId,
+            saldoCarteira = saldoCarteira?.let { String.format(Locale.US, "%.2f", it) },
+            saldoDisponivelMes = saldoDisponivelMes?.let { String.format(Locale.US, "%.2f", it) },
+        ).map { it.toDomain() }
+
     override suspend fun getResumo(periodoId: Int) =
         api.getResumo(periodoId).map { it.toDomain() }
 

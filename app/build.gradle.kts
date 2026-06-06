@@ -34,15 +34,16 @@ android {
         applicationId = "com.pratatec.moneymgtapp"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
+            val debugUrl = localProps.getProperty("debug.baseUrl") ?: "http://10.0.2.2:8000/"
+            buildConfigField("String", "BASE_URL", "\"$debugUrl\"")
         }
         release {
             signingConfig = signingConfigs.getByName("release")

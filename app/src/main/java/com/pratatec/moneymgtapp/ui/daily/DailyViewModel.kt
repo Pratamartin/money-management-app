@@ -59,10 +59,6 @@ class DailyViewModel(app: Application, val periodoId: Int) : AndroidViewModel(ap
     var addSheet by mutableStateOf(AddGastoSheetState())
         private set
 
-    init {
-        load()
-    }
-
     fun load() {
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, error = null)

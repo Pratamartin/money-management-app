@@ -22,6 +22,7 @@ import com.pratatec.moneymgtapp.domain.usecase.GetCategoriasUseCase
 import com.pratatec.moneymgtapp.domain.usecase.GetGastosDoDiaUseCase
 import com.pratatec.moneymgtapp.domain.usecase.GetPeriodosUseCase
 import com.pratatec.moneymgtapp.domain.usecase.GetResumoUseCase
+import com.pratatec.moneymgtapp.domain.usecase.UpdatePeriodoUseCase
 import android.util.Log
 import com.pratatec.moneymgtapp.ui.shared.AddGastoSheetState
 import kotlinx.coroutines.channels.Channel
@@ -39,6 +40,14 @@ data class HomeUiState(
     val error: String? = null,
     val mes: Int = Calendar.getInstance().get(Calendar.MONTH) + 1,
     val ano: Int = Calendar.getInstance().get(Calendar.YEAR),
+)
+
+data class EditPeriodoSheetState(
+    val visible: Boolean = false,
+    val saldoCarteira: String = "",
+    val saldoDisponivelMes: String = "",
+    val isSaving: Boolean = false,
+    val error: String? = null,
 )
 
 data class CreatePeriodoSheetState(
@@ -69,11 +78,15 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val getGastosDoDiaUseCase = GetGastosDoDiaUseCase(repository)
     private val getCategoriasUseCase = GetCategoriasUseCase(repository)
     private val createGastoUseCase = CreateGastoUseCase(repository)
+    private val updatePeriodoUseCase = UpdatePeriodoUseCase(repository)
 
     var uiState by mutableStateOf(HomeUiState())
         private set
 
     var createSheet by mutableStateOf(CreatePeriodoSheetState())
+        private set
+
+    var editPeriodoSheet by mutableStateOf(EditPeriodoSheetState())
         private set
 
     var addGastoSheet by mutableStateOf(AddGastoSheetState())
@@ -174,6 +187,46 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 .onFailure {
                     createSheet = createSheet.copy(isSaving = false, error = "Erro ao criar período.")
+                }
+        }
+    }
+
+    // ── Editar período ───────────────────────────────────────────────────────
+
+    fun openEditPeriodo() {
+        val periodo = uiState.periodo ?: return
+        editPeriodoSheet = EditPeriodoSheetState(
+            visible = true,
+            saldoCarteira = "%.2f".format(periodo.saldoCarteira).replace('.', ','),
+            saldoDisponivelMes = "%.2f".format(periodo.saldoDisponivelMes).replace('.', ','),
+        )
+    }
+
+    fun closeEditPeriodo() { editPeriodoSheet = EditPeriodoSheetState() }
+    fun updateEditSaldoCarteira(v: String) { editPeriodoSheet = editPeriodoSheet.copy(saldoCarteira = v, error = null) }
+    fun updateEditSaldoDisponivel(v: String) { editPeriodoSheet = editPeriodoSheet.copy(saldoDisponivelMes = v, error = null) }
+
+    fun saveEditPeriodo() {
+        val periodoId = uiState.periodo?.id ?: return
+        val carteira = editPeriodoSheet.saldoCarteira.replace(",", ".").toDoubleOrNull()
+        val disponivel = editPeriodoSheet.saldoDisponivelMes.replace(",", ".").toDoubleOrNull()
+        if (carteira == null || carteira < 0) {
+            editPeriodoSheet = editPeriodoSheet.copy(error = "Informe um saldo de carteira válido.")
+            return
+        }
+        if (disponivel == null || disponivel < 0) {
+            editPeriodoSheet = editPeriodoSheet.copy(error = "Informe um orçamento disponível válido.")
+            return
+        }
+        viewModelScope.launch {
+            editPeriodoSheet = editPeriodoSheet.copy(isSaving = true)
+            updatePeriodoUseCase(periodoId, carteira, disponivel)
+                .onSuccess {
+                    closeEditPeriodo()
+                    load()
+                }
+                .onFailure {
+                    editPeriodoSheet = editPeriodoSheet.copy(isSaving = false, error = "Erro ao salvar.")
                 }
         }
     }

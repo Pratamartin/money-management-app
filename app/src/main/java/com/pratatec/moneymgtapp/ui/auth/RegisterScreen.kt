@@ -1,7 +1,9 @@
 package com.pratatec.moneymgtapp.ui.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,10 +38,13 @@ import com.pratatec.moneymgtapp.R
 import com.pratatec.moneymgtapp.ui.auth.components.AuthFooterLink
 import com.pratatec.moneymgtapp.ui.auth.components.PasswordField
 import com.pratatec.moneymgtapp.ui.auth.components.PrimaryButton
+import com.pratatec.moneymgtapp.ui.profile.ThemeViewModel
+import com.pratatec.moneymgtapp.ui.theme.AppTheme
 
 @Composable
 fun RegisterScreen(
     viewModel: AuthViewModel,
+    themeViewModel: ThemeViewModel,
     onNavigateToLogin: () -> Unit,
     onRegisterSuccess: () -> Unit,
 ) {
@@ -60,12 +67,32 @@ fun RegisterScreen(
     ) {
         Spacer(Modifier.height(16.dp))
 
-        IconButton(onClick = onNavigateToLogin) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
-                tint = MaterialTheme.colorScheme.onBackground,
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onNavigateToLogin) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Voltar",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            IconButton(
+                onClick = {
+                    themeViewModel.setTheme(
+                        if (themeViewModel.appTheme == AppTheme.DARK) AppTheme.WHITE else AppTheme.DARK
+                    )
+                },
+            ) {
+                Icon(
+                    imageVector = if (themeViewModel.appTheme == AppTheme.DARK) Icons.Default.LightMode else Icons.Default.DarkMode,
+                    contentDescription = "Alternar tema",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
         }
 
         Spacer(Modifier.height(8.dp))

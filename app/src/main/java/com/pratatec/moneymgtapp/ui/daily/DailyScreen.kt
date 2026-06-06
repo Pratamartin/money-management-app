@@ -35,6 +35,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,6 +63,8 @@ fun DailyScreen(
     ano: Int,
     onBack: () -> Unit,
 ) {
+    LaunchedEffect(Unit) { viewModel.load() }
+
     val state = viewModel.uiState
     val daySheet = viewModel.daySheet
     val addSheet = viewModel.addSheet

@@ -13,6 +13,7 @@ interface FinanceRepository {
 
     suspend fun getPeriodos(): Result<List<Periodo>>
     suspend fun createPeriodo(mes: Int, ano: Int, saldoCarteira: Double, saldoDisponivelMes: Double): Result<Periodo>
+    suspend fun updatePeriodo(periodoId: Int, saldoCarteira: Double? = null, saldoDisponivelMes: Double? = null): Result<Periodo>
     suspend fun getResumo(periodoId: Int): Result<Resumo>
 
     suspend fun getGastosDiarios(periodoId: Int): Result<List<GastoDiario>>
