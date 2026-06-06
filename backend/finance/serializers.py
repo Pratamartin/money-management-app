@@ -13,7 +13,13 @@ class PeriodoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Periodo
         fields = ["id", "mes", "ano", "saldo_carteira", "saldo_disponivel_mes"]
-        read_only_fields = ["mes", "ano"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        if self.instance is not None:
+            fields["mes"].read_only = True
+            fields["ano"].read_only = True
+        return fields
 
     def create(self, validated_data):
         validated_data["usuario"] = self.context["request"].user
