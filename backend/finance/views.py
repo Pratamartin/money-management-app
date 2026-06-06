@@ -37,10 +37,12 @@ class CategoriaViewSet(
 class PeriodoViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
     serializer_class = PeriodoSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ["get", "post", "patch", "head", "options"]
 
     def get_queryset(self):
         return Periodo.objects.filter(usuario=self.request.user)

@@ -131,6 +131,64 @@ class PeriodoViewSetTest(APITestCase):
         response = self.client.get(f"/periodos/{periodo.pk}/resumo/")
         self.assertEqual(response.data["total_gasto_mes"], "0")
 
+    def test_patch_saldo_disponivel_mes(self):
+        periodo = Periodo.objects.create(
+            mes=6, ano=2026, usuario=self.user, saldo_disponivel_mes=Decimal("800.00")
+        )
+        response = self.client.patch(
+            f"/periodos/{periodo.pk}/",
+            {"saldo_disponivel_mes": "1200.00"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["saldo_disponivel_mes"], "1200.00")
+        periodo.refresh_from_db()
+        self.assertEqual(periodo.saldo_disponivel_mes, Decimal("1200.00"))
+
+    def test_patch_saldo_carteira(self):
+        periodo = Periodo.objects.create(
+            mes=6, ano=2026, usuario=self.user, saldo_carteira=Decimal("500.00")
+        )
+        response = self.client.patch(
+            f"/periodos/{periodo.pk}/",
+            {"saldo_carteira": "750.00"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["saldo_carteira"], "750.00")
+
+    def test_patch_mes_ano_are_ignored(self):
+        periodo = Periodo.objects.create(mes=6, ano=2026, usuario=self.user)
+        self.client.patch(
+            f"/periodos/{periodo.pk}/",
+            {"mes": 12, "ano": 2099},
+            format="json",
+        )
+        periodo.refresh_from_db()
+        self.assertEqual(periodo.mes, 6)
+        self.assertEqual(periodo.ano, 2026)
+
+    def test_patch_other_users_periodo_returns_404(self):
+        other = User.objects.create_user(
+            username="o", email="o@example.com", nome="Other", password="pass"
+        )
+        other_periodo = Periodo.objects.create(mes=6, ano=2026, usuario=other)
+        response = self.client.patch(
+            f"/periodos/{other_periodo.pk}/",
+            {"saldo_disponivel_mes": "999.00"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_put_returns_405(self):
+        periodo = Periodo.objects.create(mes=6, ano=2026, usuario=self.user)
+        response = self.client.put(
+            f"/periodos/{periodo.pk}/",
+            {"mes": 6, "ano": 2026, "saldo_carteira": "0", "saldo_disponivel_mes": "0"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
     def test_unauthenticated_returns_401(self):
         self.client.force_authenticate(user=None)
         response = self.client.get("/periodos/")
