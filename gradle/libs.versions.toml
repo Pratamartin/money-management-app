@@ -38,6 +38,12 @@ ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serializatio
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 
+wear-compose-bom = { group = "androidx.wear.compose", name = "compose-bom", version = "1.4.0" }
+wear-compose-material = { group = "androidx.wear.compose", name = "compose-material" }
+wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation" }
+wear-compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation" }
+play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version = "18.2.0" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
