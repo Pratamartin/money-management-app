@@ -42,10 +42,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun load() {
-        if (!tokenStorage.hasTokens()) {
-            uiState = uiState.copy(notAuthenticated = true)
-            return
-        }
+        if (!tokenStorage.hasTokens()) return
         val cal = Calendar.getInstance()
         val mes = cal.get(Calendar.MONTH) + 1
         val ano = cal.get(Calendar.YEAR)

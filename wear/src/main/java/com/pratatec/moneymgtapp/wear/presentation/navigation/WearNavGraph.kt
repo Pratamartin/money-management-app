@@ -8,25 +8,35 @@ import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.pratatec.moneymgtapp.wear.data.local.WearPinSession
 import com.pratatec.moneymgtapp.wear.data.local.WearPinStorage
+import com.pratatec.moneymgtapp.wear.data.local.WearTokenStorage
 import com.pratatec.moneymgtapp.wear.presentation.addgasto.AddGastoScreen
 import com.pratatec.moneymgtapp.wear.presentation.addgasto.AddGastoViewModel
 import com.pratatec.moneymgtapp.wear.presentation.addgasto.AddGastoViewModelFactory
 import com.pratatec.moneymgtapp.wear.presentation.home.HomeScreen
 import com.pratatec.moneymgtapp.wear.presentation.home.HomeViewModel
 import com.pratatec.moneymgtapp.wear.presentation.home.HomeViewModelFactory
+import com.pratatec.moneymgtapp.wear.presentation.login.LoginScreen
+import com.pratatec.moneymgtapp.wear.presentation.login.LoginViewModel
+import com.pratatec.moneymgtapp.wear.presentation.login.LoginViewModelFactory
 import com.pratatec.moneymgtapp.wear.presentation.pin.PinScreen
 import com.pratatec.moneymgtapp.wear.presentation.pin.PinViewModel
 import com.pratatec.moneymgtapp.wear.presentation.pin.PinViewModelFactory
 
+private const val ROUTE_LOGIN = "login"
 private const val ROUTE_PIN = "pin"
 private const val ROUTE_HOME = "home"
 private const val ROUTE_ADD_GASTO = "add_gasto"
 
 @Composable
 fun WearNavGraph(app: Application) {
+    val tokenStorage = WearTokenStorage(app)
     val pinStorage = WearPinStorage(app)
-    val needsPin = pinStorage.hasPin() && !WearPinSession.unlocked
-    val start = if (needsPin) ROUTE_PIN else ROUTE_HOME
+
+    val start = when {
+        !tokenStorage.hasTokens() -> ROUTE_LOGIN
+        pinStorage.hasPin() && !WearPinSession.unlocked -> ROUTE_PIN
+        else -> ROUTE_HOME
+    }
 
     val navController = rememberSwipeDismissableNavController()
 
@@ -34,6 +44,21 @@ fun WearNavGraph(app: Application) {
         navController = navController,
         startDestination = start,
     ) {
+        composable(ROUTE_LOGIN) {
+            val viewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(app))
+            LoginScreen(
+                uiState = viewModel.uiState,
+                events = viewModel.events,
+                onEmailChange = viewModel::updateEmail,
+                onPasswordChange = viewModel::updatePassword,
+                onLogin = viewModel::login,
+                onSuccess = {
+                    navController.navigate(ROUTE_HOME) {
+                        popUpTo(ROUTE_LOGIN) { inclusive = true }
+                    }
+                },
+            )
+        }
         composable(ROUTE_PIN) {
             val viewModel: PinViewModel = viewModel(factory = PinViewModelFactory(app))
             PinScreen(

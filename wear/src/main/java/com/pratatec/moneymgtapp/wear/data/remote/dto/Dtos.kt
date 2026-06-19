@@ -6,6 +6,12 @@ import kotlinx.serialization.Serializable
 data class TokenRefreshResponse(val access: String, val refresh: String? = null)
 
 @Serializable
+data class LoginRequest(val email: String, val password: String)
+
+@Serializable
+data class LoginResponse(val access: String, val refresh: String)
+
+@Serializable
 data class ResumoResponse(
     val saldo_carteira: Double,
     val saldo_disponivel_mes: Double,
