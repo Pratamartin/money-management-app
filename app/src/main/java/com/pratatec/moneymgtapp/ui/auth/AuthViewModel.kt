@@ -70,7 +70,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             loginState = loginState.copy(isLoading = true, error = null)
             loginUseCase(loginState.email, loginState.password)
                 .onSuccess { response ->
-                    WearTokenSync.push(app, response.access, response.refresh)
+                    WearTokenSync.push(getApplication(), response.access, response.refresh)
                     _events.send(AuthEvent.NavigateToHome)
                 }
                 .onFailure { loginState = loginState.copy(error = "Email ou senha inválidos.") }
@@ -124,6 +124,14 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     // --- Splash ---
 
     suspend fun hasValidSession(): Boolean = repository.hasValidSession()
+
+    fun pushTokenToWear(context: android.content.Context) {
+        viewModelScope.launch {
+            val access = tokenStorage.getAccess() ?: return@launch
+            val refresh = tokenStorage.getRefresh() ?: return@launch
+            WearTokenSync.push(context, access, refresh)
+        }
+    }
 
     override fun onCleared() {
         super.onCleared()
