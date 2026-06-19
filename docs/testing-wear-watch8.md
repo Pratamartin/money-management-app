@@ -28,19 +28,49 @@ No Android Studio, selecionar o módulo **`:wear`** no dropdown de configuraçã
 
 ### 2. Conectar via Wi-Fi (sem cabo)
 
-O Watch 8 não tem porta USB, então a conexão é sempre wireless.
+O Watch 8 **não tem porta USB** — cabo não funciona para o relógio. A conexão é
+sempre wireless. Notebook, desktop, qualquer máquina: o processo é o mesmo, desde
+que esteja na **mesma rede Wi-Fi** que o relógio.
+
+O Wear OS 3+ exige um **passo de pareamento** antes do connect. São duas portas
+diferentes: uma para parear (muda a cada sessão) e outra para conectar.
 
 ```bash
-# Descobrir o IP do relógio:
+# ── Passo 1: parear ────────────────────────────────────────────────────────
+# No relógio: Opções do desenvolvedor → Depuração por Wi-Fi → Parear novo dispositivo
+# O relógio mostra: IP, porta de pareamento (ex: 41234) e código de 6 dígitos
 
-# Configurações → Opções do desenvolvedor → Depuração por Wi-Fi
-# Vai mostrar um IP:PORT tipo 192.168.1.X:5555
+adb pair 192.168.1.X:41234
+# Digitar o código de 6 dígitos quando solicitado
+# Resposta esperada: "Successfully paired to 192.168.1.X:41234"
+
+# ── Passo 2: conectar ──────────────────────────────────────────────────────
+# Na mesma tela de Depuração por Wi-Fi, o relógio mostra outra porta (ex: 5555)
+# Essa é a porta de conexão — DIFERENTE da porta de pareamento
 
 adb connect 192.168.1.X:5555
 
-# Verificar se apareceu:
+# Verificar:
 adb devices
-# Deve listar o relógio como "192.168.1.X:5555  device"
+# Deve listar: "192.168.1.X:5555  device"
+```
+
+> O erro mais comum é tentar `adb connect` na porta de pareamento — não funciona.
+> São sempre duas portas distintas.
+
+#### Se estiver em notebook Linux e o `adb pair` travar ou recusar
+
+O firewall pode estar bloqueando. Liberar temporariamente:
+
+```bash
+# Ubuntu/Debian com ufw:
+sudo ufw allow 5555/tcp
+sudo ufw allow proto tcp to any port 30000:65535
+
+# Ou desativar só para testar (reativar depois):
+sudo ufw disable
+# ...testar adb pair/connect...
+sudo ufw enable
 ```
 
 ### 3. Instalar o APK do `:wear`
@@ -106,10 +136,12 @@ adb -s 192.168.1.X:5555 logcat --pid=$(adb -s 192.168.1.X:5555 shell pidof com.p
 
 ## Problemas comuns
 
-**`adb connect` não funciona**
-- Confirmar que celular e relógio estão na mesma rede Wi-Fi
-- Desativar e reativar "Depuração por Wi-Fi" no relógio
-- Verificar se o IP mudou (DHCP pode trocar)
+**`adb connect` recusa ou fica em "connecting"**
+- Fazer `adb pair` primeiro — o Wear OS 3+ exige pareamento antes de conectar
+- Confirmar que notebook e relógio estão na **mesma rede Wi-Fi**
+- Desativar e reativar "Depuração por Wi-Fi" no relógio (gera um novo par de portas)
+- Verificar se o IP mudou (DHCP pode trocar; o IP está em Opções do desenvolvedor)
+- Testar `ping 192.168.1.X` do notebook — se não responder, é problema de rede/firewall
 
 **Token não chega no relógio**
 - Confirmar que o Galaxy Wearable está conectado e sincronizando
