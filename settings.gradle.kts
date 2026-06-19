@@ -23,5 +23,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "moneymgtapp"
-include(":app")
+include(":app", ":wear")
  

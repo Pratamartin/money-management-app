@@ -13,6 +13,7 @@ import com.pratatec.moneymgtapp.data.repository.AuthRepositoryImpl
 import com.pratatec.moneymgtapp.domain.repository.AuthRepository
 import com.pratatec.moneymgtapp.domain.usecase.LoginUseCase
 import com.pratatec.moneymgtapp.domain.usecase.RegisterUseCase
+import com.pratatec.moneymgtapp.sync.WearTokenSync
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -68,7 +69,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             loginState = loginState.copy(isLoading = true, error = null)
             loginUseCase(loginState.email, loginState.password)
-                .onSuccess { _events.send(AuthEvent.NavigateToHome) }
+                .onSuccess { response ->
+                    WearTokenSync.push(getApplication(), response.access, response.refresh)
+                    _events.send(AuthEvent.NavigateToHome)
+                }
                 .onFailure { loginState = loginState.copy(error = "Email ou senha inválidos.") }
             loginState = loginState.copy(isLoading = false)
         }
@@ -120,6 +124,14 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     // --- Splash ---
 
     suspend fun hasValidSession(): Boolean = repository.hasValidSession()
+
+    fun pushTokenToWear(context: android.content.Context) {
+        viewModelScope.launch {
+            val access = tokenStorage.getAccess() ?: return@launch
+            val refresh = tokenStorage.getRefresh() ?: return@launch
+            WearTokenSync.push(context, access, refresh)
+        }
+    }
 
     override fun onCleared() {
         super.onCleared()
