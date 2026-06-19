@@ -16,4 +16,14 @@ object WearTokenSync {
             Wearable.getDataClient(context).putDataItem(request).await()
         }
     }
+
+    suspend fun pushPin(context: Context, pinHash: String) {
+        runCatching {
+            val request = PutDataMapRequest.create("/wear_pin").apply {
+                dataMap.putString("pin_hash", pinHash)
+                dataMap.putLong("timestamp", System.currentTimeMillis())
+            }.asPutDataRequest().setUrgent()
+            Wearable.getDataClient(context).putDataItem(request).await()
+        }
+    }
 }
