@@ -15,6 +15,17 @@ android {
     namespace = "com.pratatec.moneymgtapp.wear"
     compileSdk = 36
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(
+                System.getenv("KEYSTORE_PATH") ?: localProps.getProperty("signing.keystore")
+            )
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: localProps.getProperty("signing.password")
+            keyAlias = System.getenv("KEY_ALIAS") ?: localProps.getProperty("signing.alias")
+            keyPassword = System.getenv("KEY_PASSWORD") ?: localProps.getProperty("signing.password")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.pratatec.moneymgtapp.wear"
         minSdk = 30
@@ -29,6 +40,7 @@ android {
             buildConfigField("String", "BASE_URL", "\"$debugUrl\"")
         }
         release {
+            signingConfig = signingConfigs.getByName("release")
             buildConfigField("String", "BASE_URL", "\"https://money-management-app-production.up.railway.app/\"")
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
