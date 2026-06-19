@@ -38,6 +38,7 @@ ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serializatio
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
 wear-compose-bom = { group = "androidx.wear.compose", name = "compose-bom", version = "1.4.0" }
 wear-compose-material = { group = "androidx.wear.compose", name = "compose-material" }
 wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation" }
